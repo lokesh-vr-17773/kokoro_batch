@@ -846,7 +846,7 @@ def phonemize(text):
     _, tokens, features, nonStringFeatureIndexList = preprocess(text)
     tokens = tokenize(tokens, features, nonStringFeatureIndexList)   
     result = resolve_tokens(tokens)
-    print("Result Phonemes", result)
+    # print("Result Phonemes", result)
     return {"ps": result, "tokens": tokens}
 
 def set_lexicon(lexicon):
