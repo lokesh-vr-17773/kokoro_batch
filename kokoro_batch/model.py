@@ -17,14 +17,16 @@ class KModel(torch.nn.Module):
         config: Union[Dict, str, None],
         model: str,
         disable_complex: bool = False,
-        fp16: bool = False
+        fp16: bool = False,
+        device: torch.device = torch.device('cpu'),
     ):
         super().__init__()
 
         self.fp16 = fp16
-        self.device = 'cuda' if torch.cuda.is_available() else 'cpu'
+        self.device = device
         logger.info(f"Using device: {self.device}")
 
+        self.vocab = config['vocab'] if isinstance(config, dict) else None
         self.bert = CustomAlbert(AlbertConfig(vocab_size=config['n_token'], **config['plbert']))
         self.bert_encoder = torch.nn.Linear(self.bert.config.hidden_size, config['hidden_dim'])
         self.context_length = self.bert.config.max_position_embeddings
@@ -63,7 +65,7 @@ class KModel(torch.nn.Module):
         speeds: torch.FloatTensor
     ) -> tuple[torch.FloatTensor, torch.LongTensor]:
         
-        with torch.autocast(device_type=self.device, enabled=self.fp16):
+        with torch.autocast(device_type=self.device.type, enabled=self.fp16):
             # Select reference style vector (ref_s) for each sequence in the batch based on input_lengths.
             # ref_s[:, :128] (First 128): Timbre / Voice Identity. Determines who is speaking.
             # ref_s[:, 128:] (The rest): Prosody / Style. Determines how they are speaking.
