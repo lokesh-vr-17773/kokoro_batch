@@ -8,6 +8,8 @@ text-to-speech systems. The main steps in the process are:
 3. Phonemization - convert tokens to phonetic representations 
 4. Stress application - add proper stress markers to phonemes
 """
+import json
+from pathlib import Path
 import re
 from phonemizer.backend import EspeakBackend
 
@@ -849,7 +851,7 @@ def phonemize(text):
     # print("Result Phonemes", result)
     return {"ps": result, "tokens": tokens}
 
-def set_lexicon(lexicon):
+def set_lexicon():
     """
     Set a custom lexicon for word-to-phoneme mappings.
     
@@ -859,6 +861,12 @@ def set_lexicon(lexicon):
     Returns:
         None: Updates the global LEXICON variable
     """
+    with (
+        open(Path(__file__).parent / "us_gold.json") as gold_lexicon_file,
+        open(Path(__file__).parent / "us_silver.json") as silver_lexicon_file,
+    ):
+        lexicon = json.load(gold_lexicon_file) | json.load(silver_lexicon_file)
+
     global LEXICON
     LEXICON = lexicon
     print("LEXICON Sample keys", list(LEXICON.keys())[:10])
